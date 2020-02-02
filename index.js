@@ -1,4 +1,3 @@
-// const DISCORD_TOKEN = 'NjY5MDU5NDE5ODIwMTMwMzA0.XiaU-w.R2hIkkovx6L96qPc9NaTEN29dyw';
 // const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhk8BFfTKtCgNnJfmrL7uAdsPDEP3vL9Uz3UQa5cuxuYUpnXPr/exec';
 
 // const Discord = require('discord.js')
@@ -158,8 +157,7 @@ function callAppsScript(auth) { // eslint-disable-line no-unused-vars
         }
       }
     } else {
-      const result = resp.response.result;
-      console.log(result);
+      console.log(resp.response);
     }
   });
 }
