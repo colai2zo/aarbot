@@ -37,33 +37,38 @@ client.on('message', msg => {
   if (msg.content === '!generateAAR') {
     msg.author.send("I'll help you finish that AAR in no time!");
 
-    const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, {time: 10000});
+    const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, {time: 1000000000, max: 8});
   	const name = discordUserMap[msg.author.id.toString()].name;
   	const position = discordUserMap[msg.author.id.toString()].position;
   	const squadronCommander = discordUserMap[msg.author.id.toString()].squadronCommander;
+  	const positiveMessage = "Please reply with a positive:";
+  	const negativeMessage = "Please reply with a negative and how you will fix it going forward:";
+  	let collectCount = 0;
+  	msg.author.send(positiveMessage);
 
-  	for (let i = 0; i < 4; i++) {
-  		if (squadronCommander == false && i < 2 || squadronCommander == true && i < 3) {
-  			msg.author.send("Please reply with a positive.");
-  		} else {
-  			msg.author.send("Please reply with a negative and how you will fix it going forward.");
+  	collector.on('collect', message => {
+  		console.log("collected: " + message.content);
+  		callAppScriptFunction('updateAAR', position, collectCount, message.content);
+  		collectCount++;
+  		if (collectCount == 1 || squadronCommander == true && collectCount == 2){
+  			msg.author.send(positiveMessage);
+  		} else if (collectCount < 4) {
+  			msg.author.send(negativeMessage);
   		}
+  	});
 
-  		collector.next.then(message => {
-		    console.log(message);
-		}).catch(err => {
-		    console.log(err);
-		    msg.author.send("Something went wrong (or you timed out)! Message me with !generateAAR to try again...")
-		    break;
-		});
-
-  	} 
-  	
-
+  	collector.on('end', collected => {
+  		if (collectCount == 4){
+  			msg.author.send("Thank you! Your response has been recorded in this week's AAR.");
+  		} else {
+  			msg.author.send("It looks like this session has timed out. Please edit the AAR manually and try again next week!")
+  		}
+  	})
   }
 });
 
 
+// GOOGLE STUFF
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/script.projects',
@@ -79,7 +84,7 @@ function callAppScriptFunction(functionName, args){
 	fs.readFile('credentials.json', (err, content) => {
 	  if (err) return console.log('Error loading client secret file:', err);
 	  // Authorize a client with credentials, then call the Google Apps Script API.
-	  authorize(JSON.parse(content), callAppsScript);
+	  authorize(JSON.parse(content), callAppsScript, functionName, args);
 	});
 }
 
@@ -89,7 +94,7 @@ function callAppScriptFunction(functionName, args){
  * @param {Object} credentials The authorization client credentials.
  * @param {function} callback The callback to call with the authorized client.
  */
-function authorize(credentials, callback, params) {
+function authorize(credentials, callback, functionName, args) {
   const {client_secret, client_id, redirect_uris} = credentials.installed;
   const oAuth2Client = new google.auth.OAuth2(
       client_id, client_secret, redirect_uris[0]);
@@ -98,7 +103,7 @@ function authorize(credentials, callback, params) {
   fs.readFile(TOKEN_PATH, (err, token) => {
     if (err) return getAccessToken(oAuth2Client, callback);
     oAuth2Client.setCredentials(JSON.parse(token));
-    callback(oAuth2Client);
+    callback(oAuth2Client, functionName, args);
   });
 }
 
@@ -139,7 +144,7 @@ function getAccessToken(oAuth2Client, callback) {
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
-function callAppsScript(auth) { // eslint-disable-line no-unused-vars
+function callAppsScript(auth, functionName, args) { // eslint-disable-line no-unused-vars
   const scriptId = '1zid_zt-U97oLtaIAisRy9cdKj_Zs9A9y67OAcBmXxIa2nnG67Y8N9mgQ';
   const script = google.script('v1');
 
@@ -147,7 +152,8 @@ function callAppsScript(auth) { // eslint-disable-line no-unused-vars
   script.scripts.run({
     auth: auth,
     resource: {
-      function: 'helloWorld',
+      function: functionName,
+      parameters: args
     },
     scriptId: scriptId,
   }, function(err, resp) {
