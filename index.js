@@ -1,51 +1,51 @@
-const DISCORD_TOKEN = 'NjY5MDU5NDE5ODIwMTMwMzA0.XiaU-w.R2hIkkovx6L96qPc9NaTEN29dyw';
-const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhk8BFfTKtCgNnJfmrL7uAdsPDEP3vL9Uz3UQa5cuxuYUpnXPr/exec';
+// const DISCORD_TOKEN = 'NjY5MDU5NDE5ODIwMTMwMzA0.XiaU-w.R2hIkkovx6L96qPc9NaTEN29dyw';
+// const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhk8BFfTKtCgNnJfmrL7uAdsPDEP3vL9Uz3UQa5cuxuYUpnXPr/exec';
 
-const Discord = require('discord.js')
-const client = new Discord.Client()
-const request = require('request');
+// const Discord = require('discord.js')
+// const client = new Discord.Client()
+// const request = require('request');
 
-client.login(DISCORD_TOKEN);
+// client.login(DISCORD_TOKEN);
 
-client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`)
-})
+// client.on('ready', () => {
+//   console.log(`Logged in as ${client.user.tag}!`)
+// })
 
-client.on('message', msg => {
-//console.log(msg);
-  if (msg.content === '!generateAAR') {
-    msg.author.send("I'll help you finish that AAR in no time!");
-    msg.author.send("What is your role in the cadet wing?");
+// client.on('message', msg => {
+// //console.log(msg);
+//   if (msg.content === '!generateAAR') {
+//     msg.author.send("I'll help you finish that AAR in no time!");
+//     msg.author.send("What is your role in the cadet wing?");
 
-    const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, {time: 10000});
-  	collector.on('collect', message => {
-  		console.log(message.content);
+//     const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, {time: 10000});
+//   	collector.on('collect', message => {
+//   		console.log(message.content);
 
-		const options = {
-		    'body': {
-		    	'hello': 'world'
-		    },
-		    'followAllRedirects': true,
-		    'headers': {
-		      'content-type': 'application/json' // length of the specified `body`
-		    },
-		    'url': APPSCRIPT_URL,
-		    json: true
-		 }
+// 		const options = {
+// 		    'body': {
+// 		    	'hello': 'world'
+// 		    },
+// 		    'followAllRedirects': true,
+// 		    'headers': {
+// 		      'content-type': 'application/json' // length of the specified `body`
+// 		    },
+// 		    'url': APPSCRIPT_URL,
+// 		    json: true
+// 		 }
 
 
-  		request(options, (err, res, body) => {
-  			if (err) {
-  				console.error(err);
-  				return;
-  			}
-  			console.log(`statusCode: ${res.statusCode}`)
-  			console.log(body)
-  		});
-  	})
+//   		request(options, (err, res, body) => {
+//   			if (err) {
+//   				console.error(err);
+//   				return;
+//   			}
+//   			console.log(`statusCode: ${res.statusCode}`)
+//   			console.log(body)
+//   		});
+//   	})
 
-  }
-});
+//   }
+// });
 
 const fs = require('fs');
 const readline = require('readline');
