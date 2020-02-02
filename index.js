@@ -6,14 +6,15 @@ const client = new Discord.Client()
 const request = require('request');
 var discordToken;
 // Load client secrets from a local file.
-fs.readFile('apikey', (err, content) => {
+fs.readFile('apikey.json', (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
   // Authorize a client with credentials, then call the Google Apps Script API.
   content = JSON.parse(content);
   discordToken = content.key;
+  client.login(discordToken);
 });
 
-client.login(discordToken);
+
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`)
@@ -69,7 +70,7 @@ fs.readFile('credentials.json', (err, content) => {
  * @param {Object} credentials The authorization client credentials.
  * @param {function} callback The callback to call with the authorized client.
  */
-function authorize(credentials, callback) {
+function authorize(credentials, callback, params) {
   const {client_secret, client_id, redirect_uris} = credentials.installed;
   const oAuth2Client = new google.auth.OAuth2(
       client_id, client_secret, redirect_uris[0]);
@@ -154,7 +155,7 @@ function callAppsScript(auth) { // eslint-disable-line no-unused-vars
         }
       }
     } else {
-      console.log(resp.response);
+      console.log(resp.data.done);
     }
   });
 }
