@@ -4,6 +4,18 @@ const {google} = require('googleapis');
 const Discord = require('discord.js')
 const client = new Discord.Client()
 const request = require('request');
+const discordUserMap = {
+  "303258465969766400": {"name": "Wu", "position": "TSSQCC", "squadronCommander": true},
+  "619597742968143875": {"name": "Andrews", "position": "COT", "squadronCommander": false},
+  "620007911543930940": {"name": "White", "position": "CFLTCC", "squadronCommander": false},
+  "620435878032179200": {"name": "Notice", "position": "AFLTCC", "squadronCommander": false},
+  "619553613873807384": {"name": "Mackenzie", "position": "DCO", "squadronCommander": false},
+  "620445693022306315": {"name": "Rosero", "position": "SAO", "squadronCommander": false},
+  "380120256334790668": {"name": "Rathjen", "position": "BFLTCC", "squadronCommander": false},
+  "458868654008958976": {"name": "Jones", "position": "DFLTCC", "squadronCommander": false},
+  "620043784339849217": {"name": "Fischer", "position": "TSQCC", "squadronCommander": true},
+  "619952296989687819": {"name": "Colaizzo", "position": "PFO", "squadronCommander": false}
+}
 var discordToken;
 // Load client secrets from a local file.
 fs.readFile('apikey.json', (err, content) => {
@@ -24,24 +36,29 @@ client.on('message', msg => {
 //console.log(msg);
   if (msg.content === '!generateAAR') {
     msg.author.send("I'll help you finish that AAR in no time!");
-    msg.author.send("What is your role in the cadet wing?");
 
     const collector = new Discord.MessageCollector(msg.channel, m => m.author.id === msg.author.id, {time: 10000});
-  	collector.on('collect', message => {
-  		console.log(message.content);
+  	const name = discordUserMap[msg.author.id.toString()].name;
+  	const position = discordUserMap[msg.author.id.toString()].position;
+  	const squadronCommander = discordUserMap[msg.author.id.toString()].squadronCommander;
 
-		const options = {
-		    'body': {
-		    	'hello': 'world'
-		    },
-		    'followAllRedirects': true,
-		    'headers': {
-		      'content-type': 'application/json' // length of the specified `body`
-		    },
-		    'url': APPSCRIPT_URL,
-		    json: true
-		 }
-  	})
+  	for (let i = 0; i < 4; i++) {
+  		if (squadronCommander == false && i < 2 || squadronCommander == true && i < 3) {
+  			msg.author.send("Please reply with a positive.");
+  		} else {
+  			msg.author.send("Please reply with a negative and how you will fix it going forward.");
+  		}
+
+  		collector.next.then(message => {
+		    console.log(message);
+		}).catch(err => {
+		    console.log(err);
+		    msg.author.send("Something went wrong (or you timed out)! Message me with !generateAAR to try again...")
+		    break;
+		});
+
+  	} 
+  	
 
   }
 });
@@ -58,11 +75,13 @@ const SCOPES = ['https://www.googleapis.com/auth/script.projects',
 const TOKEN_PATH = 'token.json';
 
 // Load client secrets from a local file.
-fs.readFile('credentials.json', (err, content) => {
-  if (err) return console.log('Error loading client secret file:', err);
-  // Authorize a client with credentials, then call the Google Apps Script API.
-  authorize(JSON.parse(content), callAppsScript);
-});
+function callAppScriptFunction(functionName, args){
+	fs.readFile('credentials.json', (err, content) => {
+	  if (err) return console.log('Error loading client secret file:', err);
+	  // Authorize a client with credentials, then call the Google Apps Script API.
+	  authorize(JSON.parse(content), callAppsScript);
+	});
+}
 
 /**
  * Create an OAuth2 client with the given credentials, and then execute the
